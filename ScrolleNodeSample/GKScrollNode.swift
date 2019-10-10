@@ -58,6 +58,66 @@ private class GKScrollNodeDelegateDefault: GKScrollNodeDelegate {}
 private let GKScrollNodeDelegate_default = GKScrollNodeDelegateDefault()
 
 
+public class __GKScrollNode: SKSpriteNode {
+    
+    // ================================================= //
+    // MARK: - Properties -
+    
+    // MARK: - Variables -
+    
+    public override var size: CGSize {
+        get { return super.size }
+        set {
+            super.size = newValue
+            self._updateSize(to: newValue)
+        }
+    }
+    
+    
+    /// The size of content.
+    /// If this property smaller than node size the node automatically stop scrolling.
+    /// Default is zero
+    public var contentSize:CGSize {
+        get { return _scrollNode.contentSize }
+        set { _scrollNode.contentSize = newValue }
+    }
+    
+    
+    // MARK: - Nodes -
+    private let _scrollNode = GKScrollNode()
+    private let _cropNode = SKCropNode()
+    private let _maskNode = SKSpriteNode()
+    
+    // ================================================= //
+    // MARK: - Methods -
+    private func _updateSize(to size: CGSize) {
+        self._scrollNode.size = size
+        self._maskNode.size = size
+    }
+    
+    // ================================================= //
+    // MARK: - Constrctor -
+    private func _setup() {
+        _cropNode.addChild(_scrollNode)
+        _cropNode.maskNode = _maskNode
+        
+        self.addChild(_cropNode)
+        
+        _updateSize(to: self.size)
+    }
+    
+    public override init(texture: SKTexture?, color: UIColor, size: CGSize) {
+        super.init(texture: texture, color: color, size: size)
+        
+        _setup()
+    }
+    public required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        
+        _setup()
+    }
+    
+}
 // ================================================= //
 // MARK: - GKScrollNode -
 
