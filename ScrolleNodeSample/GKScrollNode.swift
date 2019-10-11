@@ -95,28 +95,38 @@ public class __GKScrollNode: SKSpriteNode {
         self._maskNode.size = size
     }
     
+    public override func addChild(_ node: SKNode) {
+        _scrollNode.addChild(node)
+    }
+    
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         
-        self._scrollNode._touchesBegan(from: location)
+        self._scrollNode.touchesBegan(from: location)
     }
     public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         
-        self._scrollNode._touchesMoved(to: location)
+        self._scrollNode.touchesMoved(to: location)
     }
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         
-        self._scrollNode._touchesEnded(at: location)
+        self._scrollNode.touchesEnded(at: location)
     }
     
     // ================================================= //
     // MARK: - Constrctor -
     private func _setup() {
+        self.isUserInteractionEnabled = true
+        
+        _cropNode.addChild(_scrollNode)
+        _cropNode.maskNode = _maskNode
+        
+        self.addChild(_cropNode)
         
         _updateSize(to: self.size)
     }
@@ -206,38 +216,19 @@ public class GKScrollNode: SKSpriteNode {
         self._contentNode.addChild(node)
     }
     
-    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        let location = touch.location(in: self)
-        
-        self._touchesBegan(from: location)
-    }
-    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        let location = touch.location(in: self)
-        
-        self._touchesMoved(to: location)
-    }
-    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let touch = touches.first else { return }
-        let location = touch.location(in: self)
-        
-        self._touchesEnded(at: location)
-    }
-    
-    fileprivate func _touchesBegan(from location: CGPoint) {
+    public func touchesBegan(from location: CGPoint) {
         guard isScrollEnabled else { return }
         
         _dragDidStart(from: location)
     }
     
-    fileprivate func _touchesMoved(to location: CGPoint) {
+    public func touchesMoved(to location: CGPoint) {
         guard isScrollEnabled else { return }
 
         _dragDidMove(to: location)
     }
     
-    fileprivate func _touchesEnded(at location: CGPoint) {
+    public func touchesEnded(at location: CGPoint) {
         self.isDragging = false
     }
     

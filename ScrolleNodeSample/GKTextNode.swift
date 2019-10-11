@@ -56,7 +56,7 @@ public class GKTextNode: SKSpriteNode {
     // MARK: - Privates -
     
     /// The scroll node of this node.
-    private let _scrolleNode = GKScrollNode()
+    private let _scrolleNode = __GKScrollNode()
     
     /// The label node of this node.
     private let _label = SKLabelNode()
@@ -103,6 +103,7 @@ public class GKTextNode: SKSpriteNode {
         _scrolleNode.color = .green
         
         // label
+        _label.isUserInteractionEnabled = false
         _label.numberOfLines = -1
         _label.lineBreakMode = .byTruncatingTail
         _label.fontColor = .black
