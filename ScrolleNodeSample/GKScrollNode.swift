@@ -100,13 +100,6 @@ public class GKScrollNode: SKSpriteNode {
         get { _scrollNode.contentOffset }
     }
     
-    /// The insets of scroll node.
-    public var contentInsets: UIEdgeInsets {
-        set { _scrollNode.contentInsets = newValue }
-        get { _scrollNode.contentInsets }
-    }
-    
-    
     // MARK: - Privates -
     
     // MARK: - Nodes -
@@ -211,11 +204,6 @@ private class _GKScrollNode: SKSpriteNode {
     /// If this property smaller than node size the node automatically stop scrolling.
     /// Default is zero
     public var contentSize:CGSize = .zero {
-        didSet { _checkOffset() }
-    }
-    
-    /// The insets of scroll node.
-    public var contentInsets: UIEdgeInsets = .zero {
         didSet { _checkOffset() }
     }
     

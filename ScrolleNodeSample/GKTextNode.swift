@@ -14,7 +14,14 @@ public class GKTextNode: GKScrollNode {
     // MARK: - Properties -
     
      
-    // MARK: - Nodes -
+    /// The insets of scroll node.
+    /// default is (10, 10, 10, 10).
+    public var contentInsets: UIEdgeInsets = .init(top: 10, left: 10, bottom: 10, right: 10) {
+        didSet {
+            _updateSize()
+            _updateText()
+        }
+    }
 
     /// The text of this textNode.
     public var text: String? = "" {
@@ -26,7 +33,7 @@ public class GKTextNode: GKScrollNode {
         get { return super.size }
         set {
             super.size = newValue
-            _updateSize(to: newValue)
+            _updateSize()
             _updateText()
         }
     }
@@ -68,26 +75,15 @@ public class GKTextNode: GKScrollNode {
         self._label.text = text
         
         let contentHeight = _label.frame.height
-        
-        self.contentSize.height = contentHeight
-        self._label.position.y = -contentHeight + self.size.height / 2
-        
+                
+        self.contentSize.height = contentHeight + contentInsets.top + contentInsets.bottom
+        self._label.position.y = -contentHeight + self.size.height / 2 - contentInsets.top
     }
     
     /// This methods update size of this node.
-    private func _updateSize(to size: CGSize) {
-        self._label.preferredMaxLayoutWidth = size.width
-    }
-    
-    private func _calcContentHeight(for string:String, fontSize: CGFloat, fontNamed fontName:String, width: CGFloat) -> CGFloat {
-        let maxSize = CGSize(width: width, height: 10000)
-        let font = UIFont(name: fontName, size: fontSize)
-        let size = (string as NSString).boundingRect(
-            with: maxSize,
-            options: [.usesLineFragmentOrigin, .usesFontLeading],
-            attributes: [.font: font as Any], context: nil).size
-        
-        return size.height
+    private func _updateSize() {
+        let width = size.width - contentInsets.left - contentInsets.right
+        self._label.preferredMaxLayoutWidth = width
     }
     
     // ============================================================ //
@@ -105,7 +101,7 @@ public class GKTextNode: GKScrollNode {
         self.addChild(_label)
         
         // initirize
-        self._updateSize(to: self.size)
+        self._updateSize()
     }
     
     public override init(texture: SKTexture?, color: UIColor, size: CGSize) {
