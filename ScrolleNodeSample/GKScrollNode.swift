@@ -58,13 +58,19 @@ private class GKScrollNodeDelegateDefault: GKScrollNodeDelegate {}
 private let GKScrollNodeDelegate_default = GKScrollNodeDelegateDefault()
 
 
-public class __GKScrollNode: SKSpriteNode {
+public class GKScrollNode: SKSpriteNode {
     
     // ================================================= //
     // MARK: - Properties -
     
-    // MARK: - Variables -
     
+    /// The delegate of GKScrollNode.
+    public var delegate: GKScrollNodeDelegate {
+        set { _scrollNode.delegate = newValue }
+        get { _scrollNode.delegate }
+    }
+    
+    /// The size of node.
     public override var size: CGSize {
         get { return super.size }
         set {
@@ -82,17 +88,28 @@ public class __GKScrollNode: SKSpriteNode {
         set { _scrollNode.contentSize = newValue }
     }
     
+    /// The current scroll offset. Default is .zero
+    public var contentOffset: CGPoint {
+        set { _scrollNode.contentOffset = newValue }
+        get { _scrollNode.contentOffset }
+    }
+    
+    
+    // MARK: - Privates -
     
     // MARK: - Nodes -
-    private let _scrollNode = GKScrollNode()
+    private let _scrollNode = _GKScrollNode()
     private let _cropNode = SKCropNode()
-    private let _maskNode = SKSpriteNode()
+    private let _maskNode = SKSpriteNode(color: .black, size: .zero)
     
     // ================================================= //
     // MARK: - Methods -
     private func _updateSize(to size: CGSize) {
         self._scrollNode.size = size
         self._maskNode.size = size
+        
+        
+        print(_maskNode.size)
     }
     
     public override func addChild(_ node: SKNode) {
@@ -126,7 +143,7 @@ public class __GKScrollNode: SKSpriteNode {
         _cropNode.addChild(_scrollNode)
         _cropNode.maskNode = _maskNode
         
-        self.addChild(_cropNode)
+        super.addChild(_cropNode)
         
         _updateSize(to: self.size)
     }
@@ -146,8 +163,8 @@ public class __GKScrollNode: SKSpriteNode {
 // ================================================= //
 // MARK: - GKScrollNode -
 
-/// This node is enable you to make scrolling content in SpriteKit.
-public class GKScrollNode: SKSpriteNode {
+/// The real scrolling class.
+private class _GKScrollNode: SKSpriteNode {
     
     // ======================================================== //
     // MARK: - Properties -
@@ -273,7 +290,6 @@ public class GKScrollNode: SKSpriteNode {
     // ======================================================== //
     // MARK: - Constructor -
     private func _setup() {
-        self.isUserInteractionEnabled = true
         
         super.addChild(_contentNode)
         super.addChild(_verticalIndicator)
