@@ -28,7 +28,7 @@ class ViewController: UIViewController {
 // MARK: - RMKit exp
 
 class SampleScene: SKScene {
-    let textNode = GKTextNode(color: .red, size: [200, 400])
+    let textNode = GKTextNode(color: .green, size: [200, 400])
     
     override func sceneDidLoad() {
         self.size = [300, 700]

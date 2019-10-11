@@ -9,7 +9,7 @@
 import SpriteKit
 
 
-public class GKTextNode: SKSpriteNode {
+public class GKTextNode: GKScrollNode {
     // ============================================================ //
     // MARK: - Properties -
     
@@ -54,10 +54,7 @@ public class GKTextNode: SKSpriteNode {
     
     // =============================== //
     // MARK: - Privates -
-    
-    /// The scroll node of this node.
-    private let _scrolleNode = __GKScrollNode()
-    
+        
     /// The label node of this node.
     private let _label = SKLabelNode()
     
@@ -72,7 +69,7 @@ public class GKTextNode: SKSpriteNode {
         
         let contentHeight = _label.frame.height
         
-        self._scrolleNode.contentSize.height = contentHeight
+        self.contentSize.height = contentHeight
         self._label.position.y = -contentHeight + self.size.height / 2
         
     }
@@ -80,7 +77,6 @@ public class GKTextNode: SKSpriteNode {
     /// This methods update size of this node.
     private func _updateSize(to size: CGSize) {
         self._label.preferredMaxLayoutWidth = size.width
-        self._scrolleNode.size = size
     }
     
     private func _calcContentHeight(for string:String, fontSize: CGFloat, fontNamed fontName:String, width: CGFloat) -> CGFloat {
@@ -99,17 +95,14 @@ public class GKTextNode: SKSpriteNode {
     
     /// This methods set up node.
     private func _setup() {
-        // = for debug =
-        _scrolleNode.color = .green
         
         // label
         _label.isUserInteractionEnabled = false
         _label.numberOfLines = -1
         _label.lineBreakMode = .byTruncatingTail
         _label.fontColor = .black
-        _scrolleNode.addChild(_label)
-        // scroll node
-        self.addChild(_scrolleNode)
+        
+        self.addChild(_label)
         
         // initirize
         self._updateSize(to: self.size)

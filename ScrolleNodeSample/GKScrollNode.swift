@@ -29,7 +29,7 @@ private let GKScrollNodeDataSource_default = GKScrollNodeDataSourceDefault()
 
 // MARK: - Make Optional -
 public extension GKScrollNodeDataSource {
-    func scrollIndicator() ->SKSpriteNode { SKSpriteNode(texture: nil, color: UIColor(white: 1, alpha: 1).withAlphaComponent(0.4), size: .zero) }
+    func scrollIndicator() ->SKSpriteNode { SKSpriteNode(texture: nil, color: UIColor.black.withAlphaComponent(0.4), size: .zero) }
     func resizeScrollIndicator(from node: SKSpriteNode, to size: CGSize) { node.size = size }
     func scrollIndicatorBackgroundColor() -> SKColor { .orange }
 }
@@ -70,6 +70,12 @@ public class GKScrollNode: SKSpriteNode {
         get { _scrollNode.delegate }
     }
     
+    /// The datasource of GKScrollNode.
+    public var datasource: GKScrollNodeDataSource {
+        set { _scrollNode.datasoruce = newValue }
+        get { _scrollNode.datasoruce }
+    }
+    
     /// The size of node.
     public override var size: CGSize {
         get { return super.size }
@@ -94,6 +100,12 @@ public class GKScrollNode: SKSpriteNode {
         get { _scrollNode.contentOffset }
     }
     
+    /// The insets of scroll node.
+    public var contentInsets: UIEdgeInsets {
+        set { _scrollNode.contentInsets = newValue }
+        get { _scrollNode.contentInsets }
+    }
+    
     
     // MARK: - Privates -
     
@@ -104,13 +116,6 @@ public class GKScrollNode: SKSpriteNode {
     
     // ================================================= //
     // MARK: - Methods -
-    private func _updateSize(to size: CGSize) {
-        self._scrollNode.size = size
-        self._maskNode.size = size
-        
-        
-        print(_maskNode.size)
-    }
     
     public override func addChild(_ node: SKNode) {
         _scrollNode.addChild(node)
@@ -135,6 +140,12 @@ public class GKScrollNode: SKSpriteNode {
         self._scrollNode.touchesEnded(at: location)
     }
     
+    // MARK: - Privates -
+    private func _updateSize(to size: CGSize) {
+        self._scrollNode.size = size
+        self._maskNode.size = size
+        
+    }
     // ================================================= //
     // MARK: - Constrctor -
     private func _setup() {
@@ -161,7 +172,7 @@ public class GKScrollNode: SKSpriteNode {
     
 }
 // ================================================= //
-// MARK: - GKScrollNode -
+// MARK: - _GKScrollNode -
 
 /// The real scrolling class.
 private class _GKScrollNode: SKSpriteNode {
@@ -175,7 +186,7 @@ private class _GKScrollNode: SKSpriteNode {
     public weak var delegate: GKScrollNodeDelegate! = GKScrollNodeDelegate_default
     
     /// The datasource of GKScrollNode.
-    public weak var datasouce: GKScrollNodeDataSource! = GKScrollNodeDataSource_default
+    public weak var datasoruce: GKScrollNodeDataSource! = GKScrollNodeDataSource_default
     
     // MARK: - Variables -
     
@@ -203,6 +214,11 @@ private class _GKScrollNode: SKSpriteNode {
         didSet { _checkOffset() }
     }
     
+    /// The insets of scroll node.
+    public var contentInsets: UIEdgeInsets = .zero {
+        didSet { _checkOffset() }
+    }
+    
     // MARK: - Options -
     
     public var isScrollEnabled:Bool = true
@@ -224,28 +240,24 @@ private class _GKScrollNode: SKSpriteNode {
     
     // ======================================================== //
     // MARK: - Methods -
-    public func setOffset(_ offset:CGPoint) {
-        self.contentOffset = offset
-        _checkOffset()
-    }
     
-    public override func addChild(_ node: SKNode) {
+    fileprivate override func addChild(_ node: SKNode) {
         self._contentNode.addChild(node)
     }
     
-    public func touchesBegan(from location: CGPoint) {
+    fileprivate func touchesBegan(from location: CGPoint) {
         guard isScrollEnabled else { return }
         
         _dragDidStart(from: location)
     }
     
-    public func touchesMoved(to location: CGPoint) {
+    fileprivate func touchesMoved(to location: CGPoint) {
         guard isScrollEnabled else { return }
 
         _dragDidMove(to: location)
     }
     
-    public func touchesEnded(at location: CGPoint) {
+    fileprivate func touchesEnded(at location: CGPoint) {
         self.isDragging = false
     }
     
@@ -311,12 +323,12 @@ private class _GKScrollNode: SKSpriteNode {
 }
 
 // ratificate
-extension GKScrollNode: GKScrollNodeScrolleIndicatorDataSource {
-    var indicatorBackgroundColor: SKColor { return datasouce.scrollIndicatorBackgroundColor() }
+extension _GKScrollNode: GKScrollNodeScrolleIndicatorDataSource {
+    var indicatorBackgroundColor: SKColor { return datasoruce.scrollIndicatorBackgroundColor() }
 
-    var indicatorNode: SKSpriteNode { return datasouce.scrollIndicator() }
+    var indicatorNode: SKSpriteNode { return datasoruce.scrollIndicator() }
     
-    func resizeIndicator(_ node: SKSpriteNode, to size: CGSize) { self.datasouce.resizeScrollIndicator(from: node, to: size) }
+    func resizeIndicator(_ node: SKSpriteNode, to size: CGSize) { self.datasoruce.resizeScrollIndicator(from: node, to: size) }
 }
  
 private protocol GKScrollNodeScrolleIndicatorDataSource: class {
