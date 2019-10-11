@@ -95,13 +95,28 @@ public class __GKScrollNode: SKSpriteNode {
         self._maskNode.size = size
     }
     
+    public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
+        
+        self._scrollNode._touchesBegan(from: location)
+    }
+    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
+        
+        self._scrollNode._touchesMoved(to: location)
+    }
+    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
+        
+        self._scrollNode._touchesEnded(at: location)
+    }
+    
     // ================================================= //
     // MARK: - Constrctor -
     private func _setup() {
-        _cropNode.addChild(_scrollNode)
-        _cropNode.maskNode = _maskNode
-        
-        self.addChild(_cropNode)
         
         _updateSize(to: self.size)
     }
@@ -192,24 +207,37 @@ public class GKScrollNode: SKSpriteNode {
     }
     
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard isScrollEnabled else { return }
         guard let touch = touches.first else { return }
-        
         let location = touch.location(in: self)
+        
+        self._touchesBegan(from: location)
+    }
+    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
+        
+        self._touchesMoved(to: location)
+    }
+    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        guard let touch = touches.first else { return }
+        let location = touch.location(in: self)
+        
+        self._touchesEnded(at: location)
+    }
+    
+    fileprivate func _touchesBegan(from location: CGPoint) {
+        guard isScrollEnabled else { return }
         
         _dragDidStart(from: location)
     }
     
-    public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+    fileprivate func _touchesMoved(to location: CGPoint) {
         guard isScrollEnabled else { return }
-        guard let touch = touches.first else { return }
-        
-        let location = touch.location(in: self)
-        
+
         _dragDidMove(to: location)
     }
     
-    public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+    fileprivate func _touchesEnded(at location: CGPoint) {
         self.isDragging = false
     }
     
@@ -217,6 +245,7 @@ public class GKScrollNode: SKSpriteNode {
     // MARK: - Private -
     private func _checkOffset() {
         self._contentNode.position = _modifyOffset(contentOffset)
+        
         _verticalIndicator.update()
     }
     
