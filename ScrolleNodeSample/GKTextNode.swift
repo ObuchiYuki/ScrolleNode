@@ -8,7 +8,8 @@
 
 import SpriteKit
 
-
+/// This node can display multi-line text.
+/// If the content overs node size. Node automatically enable scrolling.
 public class GKTextNode: GKScrollNode {
     // ============================================================ //
     // MARK: - Properties -

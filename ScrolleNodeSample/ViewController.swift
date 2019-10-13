@@ -17,7 +17,7 @@ class ViewController: UIViewController {
         super.viewDidLoad()
 
         let scene = SampleScene()
-        scene.scaleMode = .aspectFill
+        scene.scaleMode = .aspectFit
         skView.presentScene(scene)
         
     }
@@ -28,19 +28,61 @@ class ViewController: UIViewController {
 // MARK: - RMKit exp
 
 class SampleScene: SKScene {
-    let textNode = GKTextNode(color: .green, size: [200, 400])
+    let label = SKLabelNode()
+    let tableNode = GKTableNode(color: .clear, size: [200, 400])
     
     override func sceneDidLoad() {
         self.size = [300, 700]
         
-        textNode.fontSize = 15
-        textNode.fontColor = .red
-        textNode.contentInsets = 
+        label.position = [150, 100]
         
-        textNode.text = "電子たばこの登場以来、若年喫煙者数の増加はうなぎ登り。一方で、重篤な健康被害の報告もあり、アメリカではサンフランシスコ市が電子たばこの販売・流通を禁止するなど規制が強化され、小売業者による取り扱いの停止も始まっています。そんな中でさらに追い打ちをかけるように、中国最大規模の通販サイト・アリババが、電子たばこ関連部品のアメリカ向け販売を中止したことが明らかになりました。電子たばこの登場以来、若年喫煙者数の増加はうなぎ登り。一方で、重篤な健康被害の報告もあり、アメリカではサンフランシスコ市が電子たばこの販売・流通を禁止するなど規制が強化され、小売業者による取り扱いの停止も始まっています。そんな中でさらに追い打ちをかけるように、中国最大規模の通販サイト・アリババが、電子たばこ関連部品のアメリカ向け販売を中止したことが明らかになりました。電子たばこの登場以来、若年喫煙者数の増加はうなぎ登り。一方で、重篤な健康被害の報告もあり、アメリカではサンフランシスコ市が電子たばこの販売・流通を禁止するなど規制が強化され、小売業者による取り扱いの停止も始まっています。そんな中でさらに追い打ちをかけるように、中国最大規模の通販サイト・アリババが、電子たばこ関連部品のアメリカ向け販売を中止したことが明らかになりました。"
+        tableNode.register(Cell.self, for: "cell")
+        tableNode.datasource = self
+        tableNode.delegate = self
+        tableNode.position = [150, 350]
         
-        textNode.position = [150, 350]
-        
-        self.addChild(textNode)
+        self.addChild(label)
+        self.addChild(tableNode)
     }
+}
+
+class Cell: GKTableNodeCell {
+    let label = SKLabelNode()
+    
+    init() {
+        super.init(texture: nil, color: .red, size: .zero)
+        
+        self.addChild(label)
+    }
+    
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+    }
+}
+extension SampleScene: GKTableNodeDelegate {
+    func tableNode(_ tableNode: GKTableNode, cellDidSelectedAt index: Int) {
+        label.text = "Cell selected at \(index)"
+    }
+}
+extension SampleScene: GKTableNodeDataSource {
+    func numberOfRows(_ tableNode: GKTableNode) -> Int {
+        50
+    }
+    
+    func tableNode(_ tableNode: GKTableNode, cellForRowAt index: Int) -> GKTableNodeCell {
+        guard let cell = tableNode.dequeueReusableCell(for: "cell", at: index) as? Cell else { fatalError() }
+        cell.label.text = "\(index)"
+        cell.label.fontColor = .black
+        if index % 2 == 0 {
+            cell.color = .red
+        } else {
+            cell.color = .green
+        }
+        return cell
+    }
+    
+    func cellHeight(_ tableNode: GKTableNode) -> CGFloat {
+        100
+    }
+    
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B62DBC3123517B8900E00052 /* File.swift in Sources */ = {isa = PBXBuildFile; fileRef = B62DBC3023517B8900E00052 /* File.swift */; };
 		B645EFF5234B0DDD004B75C7 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B645EFF4234B0DDD004B75C7 /* AppDelegate.swift */; };
 		B645EFF7234B0DDD004B75C7 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B645EFF6234B0DDD004B75C7 /* ViewController.swift */; };
 		B645EFFA234B0DDD004B75C7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B645EFF8234B0DDD004B75C7 /* Main.storyboard */; };
@@ -19,6 +20,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		B62DBC3023517B8900E00052 /* File.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		B645EFF1234B0DDD004B75C7 /* ScrolleNodeSample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ScrolleNodeSample.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B645EFF4234B0DDD004B75C7 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B645EFF6234B0DDD004B75C7 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -69,8 +71,9 @@
 				B645EFFD234B0DDE004B75C7 /* LaunchScreen.storyboard */,
 				B645F000234B0DDE004B75C7 /* Info.plist */,
 				B6F0CE9C234DDE7E0023FC07 /* RMKit.swift */,
-				B6F0CE9E234DDE930023FC07 /* GKScrollNode.swift */,
+				B62DBC3023517B8900E00052 /* File.swift */,
 				B65D4795234F031A00E247EE /* GKTextNode.swift */,
+				B6F0CE9E234DDE930023FC07 /* GKScrollNode.swift */,
 				B65CAD7E235020D800D010B6 /* GKTableNode.swift */,
 			);
 			path = ScrolleNodeSample;
@@ -149,6 +152,7 @@
 			files = (
 				B6F0CE9F234DDE930023FC07 /* GKScrollNode.swift in Sources */,
 				B6F0CE9D234DDE7E0023FC07 /* RMKit.swift in Sources */,
+				B62DBC3123517B8900E00052 /* File.swift in Sources */,
 				B65CAD7F235020D800D010B6 /* GKTableNode.swift in Sources */,
 				B645EFF7234B0DDD004B75C7 /* ViewController.swift in Sources */,
 				B65D4796234F031A00E247EE /* GKTextNode.swift in Sources */,

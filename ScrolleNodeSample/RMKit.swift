@@ -8,6 +8,14 @@
 
 import CoreGraphics
 
+extension Array where Element: Equatable & Hashable {
+    @discardableResult
+    public mutating func remove(of item: Element) -> Element? {
+        guard let index = self.firstIndex(of: item) else { return nil }
+        
+        return self.remove(at: index)
+    }
+}
 
 extension Comparable {
     func into(_ range: ClosedRange<Self>) -> Self {

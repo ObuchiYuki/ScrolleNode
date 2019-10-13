@@ -39,17 +39,17 @@ public extension GKScrollNodeDataSource {
 
 public protocol GKScrollNodeDelegate: class {
     // all optional
-    func scrollNode(_ scrollNode: GKScrollNode, scrollViewDidMoveTo offset: CGPoint)
-    func scrollNode(_ scrollNode: GKScrollNode, scrollViewWillMoveTo offset: CGPoint)
+    func scrollNode(scrollViewDidMoveTo offset: CGPoint)
+    func scrollNode(scrollViewWillMoveTo offset: CGPoint)
     
-    func scrollNode(_ scrollNode: GKScrollNode, shouldShowScrollIndicatorAt offset: CGPoint) -> Bool
+    func scrollNode(shouldShowScrollIndicatorAt offset: CGPoint) -> Bool
 }
 
 public extension GKScrollNodeDelegate {
-    func scrollNode(_ scrollNode: GKScrollNode, scrollViewDidMoveTo offset: CGPoint) {}
-    func scrollNode(_ scrollNode: GKScrollNode, scrollViewWillMoveTo offset: CGPoint) {}
+    func scrollNode(scrollViewDidMoveTo offset: CGPoint) {}
+    func scrollNode(scrollViewWillMoveTo offset: CGPoint) {}
     
-    func scrollNode(_ scrollNode: GKScrollNode, shouldShowScrollIndicatorAt offset: CGPoint) -> Bool { return true }
+    func scrollNode(shouldShowScrollIndicatorAt offset: CGPoint) -> Bool { return true }
 }
 
 /// The default instance class of GKScrollNodeDelegate.
@@ -65,15 +65,17 @@ public class GKScrollNode: SKSpriteNode {
     
     
     /// The delegate of GKScrollNode.
-    public var delegate: GKScrollNodeDelegate {
-        set { _scrollNode.delegate = newValue }
-        get { _scrollNode.delegate }
+    public weak var delegate: GKScrollNodeDelegate? = nil {
+        didSet {
+            _scrollNode.delegate = self.delegate
+        }
     }
     
     /// The datasource of GKScrollNode.
-    public var datasource: GKScrollNodeDataSource {
-        set { _scrollNode.datasoruce = newValue }
-        get { _scrollNode.datasoruce }
+    public weak var datasource: GKScrollNodeDataSource? = nil {
+        didSet {
+            _scrollNode.datasoruce = self.datasource
+        }
     }
     
     /// The size of node.
@@ -100,7 +102,19 @@ public class GKScrollNode: SKSpriteNode {
         get { _scrollNode.contentOffset }
     }
     
+
+    /// Whether to let the parent view function touch events.
+    public var needsPenetrateTouch:Bool = true
+    
     // MARK: - Privates -
+    
+    private var _inertiaXRunning:Bool = false
+    private var _inertiaYRunning:Bool = false
+    
+    private var _inertiaVector: CGPoint?
+    private var _inertiaStartingVector: CGPoint?
+    private var _frameBeforeLocation: CGPoint = .zero
+    private var _displayLink:CADisplayLink? = nil
     
     // MARK: - Nodes -
     private let _scrollNode = _GKScrollNode()
@@ -115,34 +129,112 @@ public class GKScrollNode: SKSpriteNode {
     }
     
     public override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        _endInertia()
+        
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         
+        if needsPenetrateTouch { parent?.touchBegan(from: location) }
+        
         self._scrollNode.touchesBegan(from: location)
+        
+        _frameBeforeLocation = location
     }
     public override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         
+        if needsPenetrateTouch { parent?.touchMoved(to: location) }
+        
         self._scrollNode.touchesMoved(to: location)
+        
+        _frameBeforeLocation = location
     }
     public override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let touch = touches.first else { return }
         let location = touch.location(in: self)
         
+        if needsPenetrateTouch { parent?.touchEnded(at: location) }
+        
         self._scrollNode.touchesEnded(at: location)
+        
+        let endVector = location - _frameBeforeLocation
+        
+        _startMovingWithInertia(with: endVector)
     }
     
     // MARK: - Privates -
+    
     private func _updateSize(to size: CGSize) {
         self._scrollNode.size = size
         self._maskNode.size = size
         
     }
+    
+    private func _startMovingWithInertia(with vector: CGPoint) {
+        _inertiaXRunning = true
+        _inertiaYRunning = true
+        _inertiaStartingVector = vector
+        _inertiaVector = vector
+    }
+    
+    @objc private func _updateDisplay(_ sender: CADisplayLink) {
+        
+        
+        if _inertiaXRunning {
+            guard let vector = _inertiaVector else { return }
+            guard let startingVector = _inertiaStartingVector else { return }
+            
+            let dx:CGFloat = _calcDelta(startingVector.x, vector.x)
+            
+            _inertiaVector = vector - [dx, 0]
+            _scrollNode.setOffset(_scrollNode.contentOffset + vector)
+            
+            
+            if (startingVector.x * _inertiaVector!.x) <= 0 {
+                _inertiaXRunning = false
+            }
+        }
+        
+        if _inertiaYRunning {
+            guard let vector = _inertiaVector else { return }
+            guard let startingVector = _inertiaStartingVector else { return }
+            
+            let dy = _calcDelta(startingVector.y, vector.y)
+            
+            _inertiaVector = vector - [0, dy]
+            _scrollNode.setOffset(_scrollNode.contentOffset + vector)
+                        
+            if (startingVector.y * _inertiaVector!.y) <= 0 {
+                _inertiaYRunning = false
+            }
+        }
+    }
+    
+    private func _endInertia() {
+        _inertiaXRunning = false
+        _inertiaYRunning = false
+    }
+    
+    private func _calcDelta(_ d: CGFloat,_ dd: CGFloat) -> CGFloat {
+        var delta: CGFloat
+        if d > 0 { delta = 1 } else { delta = -1 }
+ 
+        /// These are magic numbers.
+        delta *= abs(d) * 2.4 + 43.11
+        delta *= abs(dd) + 5.12
+        delta *= 0.000372
+        
+        return delta
+    }
+    
     // ================================================= //
     // MARK: - Constrctor -
     private func _setup() {
         self.isUserInteractionEnabled = true
+        
+        _displayLink = CADisplayLink(target: self, selector: #selector(_updateDisplay))
+        _displayLink?.add(to: .main, forMode: .common)
         
         _cropNode.addChild(_scrollNode)
         _cropNode.maskNode = _maskNode
@@ -152,6 +244,9 @@ public class GKScrollNode: SKSpriteNode {
         _updateSize(to: self.size)
     }
     
+    deinit {
+        _displayLink?.remove(from: .main, forMode: .common)
+    }
     public override init(texture: SKTexture?, color: UIColor, size: CGSize) {
         super.init(texture: texture, color: color, size: size)
         
@@ -168,6 +263,7 @@ public class GKScrollNode: SKSpriteNode {
 // MARK: - _GKScrollNode -
 
 /// The real scrolling class.
+/// スクロールの仕組み自体を提供、Crop、慣性、反発　などは -> GKScrollNode
 private class _GKScrollNode: SKSpriteNode {
     
     // ======================================================== //
@@ -221,13 +317,31 @@ private class _GKScrollNode: SKSpriteNode {
     private let _verticalIndicator = GKScrollNodeScrolleIndicator()
 
     // MARK: - Variables -
-    // contentOffset can only be (x: -, y: -)
     
     private var _startOffset = CGPoint.zero
     private var _startTouchLocation = CGPoint.zero
     
     // ======================================================== //
     // MARK: - Methods -
+    
+    fileprivate func setOffset(_ offset: CGPoint, needsNoticeDelegate:Bool = true, needsCheck:Bool = true) {
+        var offset = offset
+        
+        if needsCheck {
+            offset = _modifyOffset(offset)
+        }
+        
+        if needsNoticeDelegate{
+            self.delegate.scrollNode(scrollViewWillMoveTo: offset)
+        }
+        self.contentOffset = offset
+        
+        _checkOffset()
+        
+        if needsNoticeDelegate{
+            self.delegate.scrollNode(scrollViewDidMoveTo: contentOffset)
+        }
+    }
     
     fileprivate override func addChild(_ node: SKNode) {
         self._contentNode.addChild(node)
@@ -248,7 +362,6 @@ private class _GKScrollNode: SKSpriteNode {
     fileprivate func touchesEnded(at location: CGPoint) {
         self.isDragging = false
     }
-    
     // ======================================================== //
     // MARK: - Private -
     private func _checkOffset() {
@@ -266,9 +379,8 @@ private class _GKScrollNode: SKSpriteNode {
     
     private func _dragDidMove(to location: CGPoint) {
         guard let delta = _calcDelta(location) else { return }
-        self.contentOffset = _modifyOffset(_startOffset + delta)
         
-        _checkOffset()
+        setOffset(_startOffset + delta)
     }
     
     private func _modifyOffset(_ offset: CGPoint) -> CGPoint {
